@@ -45,12 +45,16 @@ public class LoginActivity extends AppCompatActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.sign_in_button:
+                //로그인시 Id가 있는지 없는지 판별을 도와줌.
                 mLogin = false;
                 mMyRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+                        //아이디 공백 체크
                         if (!mIdView.getText().toString().equals("")) {
+                            //비밀번호 공백 체크
                             if (!mPasswordView.getText().toString().equals("")) {
+                                //DataBase에 중복 아이디 있는지 확인
                                 for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
                                     if (mIdView.getText().toString().equals(dataSnapshot1.getKey())) {
                                         Toast.makeText(LoginActivity.this, "로그인이 되었습니다!",

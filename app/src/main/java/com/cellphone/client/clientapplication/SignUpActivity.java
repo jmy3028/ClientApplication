@@ -51,7 +51,7 @@ public class SignUpActivity extends AppCompatActivity {
                 mMyRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-
+                        //Id가 DataBase에 있는지 확인
                         for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
                             if (mIdEdit.getText().toString().equals(dataSnapshot1.getKey())) {
                                 mMyRef.removeEventListener(this);
@@ -59,6 +59,7 @@ public class SignUpActivity extends AppCompatActivity {
                                         Toast.LENGTH_SHORT).show();
                             }
                         }
+                        //회원가입시 공백란 체크.
                         if(!mIdEdit.getText().toString().equals("")
                                 && !mPassEdit.getText().toString().equals("")
                                 && !mNameEdit.getText().toString().equals("")){
