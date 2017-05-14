@@ -14,12 +14,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Iterator;
+
 public class SignUpActivity extends AppCompatActivity {
 
     private EditText mIdEdit;
     private EditText mPassEdit;
     private EditText mNameEdit;
-    private FirebaseDatabase mDatabase;
     private DatabaseReference mMyRef;
     private String mIdKey;
 
@@ -34,7 +35,7 @@ public class SignUpActivity extends AppCompatActivity {
         mNameEdit = (EditText) findViewById(R.id.name_edit);
 
         // firebase와 연동
-        mDatabase = FirebaseDatabase.getInstance();
+        FirebaseDatabase mDatabase = FirebaseDatabase.getInstance();
         mMyRef = mDatabase.getReference("Client");
 
 
@@ -47,47 +48,40 @@ public class SignUpActivity extends AppCompatActivity {
                 finish();
                 break;
             case R.id.sign_up_button:
+                mMyRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
 
-                mMyRef.orderByChild("Client").equalTo(mIdEdit.getText().toString())
-                        .addChildEventListener(new ChildEventListener() {
-                            @Override
-                            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                                if (dataSnapshot.getKey().equals(mIdEdit.getText().toString())) {
-                                    Toast.makeText(SignUpActivity.this, "해당아이디가 이미 존재 합니다."
-                                            , Toast.LENGTH_SHORT).show();
-                                } else {
-                                    //firebase에 휴대폰 번호(App ID)를 상단층으로 등록한후, 그 밑에 수하에 비밀번호,
-                                    //이름, 포인트, 등급 순으로 데이터를 저장 한뒤에 가입화면 종료.
-                                    ClientModel clientModel = new ClientModel(mPassEdit.getText().toString(),
-                                            mNameEdit.getText().toString(), 0, "사원");
-                                    mMyRef.child(mIdEdit.getText().toString()).setValue(clientModel);
-                                    finish();
-                                }
-
+                        for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+                            if (mIdEdit.getText().toString().equals(dataSnapshot1.getKey())) {
+                                mMyRef.removeEventListener(this);
+                                Toast.makeText(SignUpActivity.this, "해당 아이디는 존재 합니다.",
+                                        Toast.LENGTH_SHORT).show();
                             }
+                        }
+                        if(!mIdEdit.getText().toString().equals("")
+                                && !mPassEdit.getText().toString().equals("")
+                                && !mNameEdit.getText().toString().equals("")){
 
-                            @Override
-                            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                            ClientModel clientModel = new ClientModel(mPassEdit.getText().toString(),
+                                    mNameEdit.getText().toString(),0,"사원");
+                            mMyRef.child(mIdEdit.getText().toString()).setValue(clientModel);
+                            Toast.makeText(SignUpActivity.this, "회원가입이 완료 되었습니다!!", Toast.LENGTH_SHORT).show();
+                            mMyRef.removeEventListener(this);
+                            finish();
+                        }else {
+                            Toast.makeText(SignUpActivity.this, "공백없이 채워주세요!!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
 
-                            }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
 
-                            @Override
-                            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                            }
-
-                            @Override
-                            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
+                    }
+                });
 
 
         }
     }
+
 }
